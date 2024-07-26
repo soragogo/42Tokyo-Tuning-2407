@@ -1,8 +1,8 @@
 use std::path::{Path, PathBuf};
-use std::process::Command;
+use std::fs::File;
+use std::io::Read;
 
 use actix_web::web::Bytes;
-use log::error;
 
 use crate::errors::AppError;
 use crate::models::user::{Dispatcher, Session, User};
@@ -167,27 +167,14 @@ impl<T: AuthRepository + std::fmt::Debug> AuthService<T> {
         let path: PathBuf =
             Path::new(&format!("images/user_profile/{}", profile_image_name)).to_path_buf();
 
-        let output = Command::new("magick")
-            .arg(&path)
-            .arg("-resize")
-            .arg("500x500")
-            .arg("png:-")
-            .output()
-            .map_err(|e| {
-                error!("画像リサイズのコマンド実行に失敗しました: {:?}", e);
-                AppError::InternalServerError
-            })?;
+				let mut fl = File::open(path).unwrap();
+        let mut img_buffer = Vec::new();
+				fl.read_to_end(&mut img_buffer);
 
-        match output.status.success() {
-            true => Ok(Bytes::from(output.stdout)),
-            false => {
-                error!(
-                    "画像リサイズのコマンド実行に失敗しました: {:?}",
-                    String::from_utf8_lossy(&output.stderr)
-                );
-                Err(AppError::InternalServerError)
-            }
-        }
+				match true {
+					true => Ok(Bytes::from(img_buffer)),
+					false => Err(AppError::InternalServerError)
+				}
     }
 
     pub async fn validate_session(&self, session_token: &str) -> Result<bool, AppError> {
