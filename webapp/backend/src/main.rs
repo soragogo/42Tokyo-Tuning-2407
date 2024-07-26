@@ -16,6 +16,16 @@ use repositories::map_repository::MapRepositoryImpl;
 use repositories::order_repository::OrderRepositoryImpl;
 use repositories::tow_truck_repository::TowTruckRepositoryImpl;
 
+use opentelemetry::sdk::export::trace::stdout;
+use opentelemetry::sdk::trace as sdktrace;
+use opentelemetry::trace::Tracer;
+use opentelemetry::{global, sdk::Resource};
+use opentelemetry_datadog::new_pipeline;
+use std::error::Error;
+use tracing::{info, instrument};
+use tracing_subscriber::layer::SubscriberExt;
+use tracing_subscriber::Registry;
+
 mod api;
 mod domains;
 mod errors;
@@ -27,6 +37,22 @@ mod utils;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+
+    // Initialize the Datadog pipeline
+    let tracer = new_pipeline()
+        .with_service_name("your-service-name")
+        .with_env("your-environment")
+        .install_simple()?;
+
+    // Set the global tracer
+    global::set_tracer_provider(tracer);
+
+    // Create a tracing subscriber
+    let subscriber = Registry::default().with(tracing_subscriber::fmt::Layer::default());
+
+    // Set the tracing subscriber
+    tracing::subscriber::set_global_default(subscriber)?;
+
     let pool = infrastructure::db::create_pool().await;
     let mut port = 8080;
 

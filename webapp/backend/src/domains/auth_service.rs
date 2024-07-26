@@ -108,6 +108,7 @@ impl<T: AuthRepository + std::fmt::Debug> AuthService<T> {
         username: &str,
         password: &str,
     ) -> Result<LoginResponseDto, AppError> {
+        info!("start login user");
         match self.repository.find_user_by_username(username).await? {
             Some(user) => {
                 let is_password_valid = verify_password(&user.password, password).unwrap();
@@ -146,6 +147,7 @@ impl<T: AuthRepository + std::fmt::Debug> AuthService<T> {
             }
             None => Err(AppError::Unauthorized),
         }
+        info!("end login user");
     }
 
     pub async fn logout_user(&self, session_token: &str) -> Result<(), AppError> {
