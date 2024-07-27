@@ -22,6 +22,8 @@ actix-files = "0.6.6"
 image = "0.23"
 bytes = "1.0"
 priority-queue = "1.2"
+lazy_static = "1.5.0"
+bcrypt = "0.15.1"
 
 [build-dependencies]
 syn = "1"

@@ -1,4 +1,6 @@
 use std::sync::Arc;
+use actix_web::web::Bytes;
+use std::path::PathBuf;
 
 use actix_cors::Cors;
 use actix_web::{web, App, HttpServer};
@@ -24,9 +26,17 @@ mod middlewares;
 mod models;
 mod repositories;
 mod utils;
+use lazy_static::lazy_static;
+use std::sync::Mutex;
+use std::collections::HashMap;
+
+lazy_static! {
+    pub static ref HM: Mutex<HashMap<PathBuf, Bytes>> = Mutex::new(HashMap::new());
+}
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+
     let pool = infrastructure::db::create_pool().await;
     let mut port = 8080;
 

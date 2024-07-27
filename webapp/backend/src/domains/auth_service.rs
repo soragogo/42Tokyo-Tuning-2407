@@ -2,6 +2,8 @@ use std::path::{Path, PathBuf};
 use std::fs::File;
 use std::io::Read;
 
+use crate::HM;
+
 use actix_web::web::Bytes;
 
 use crate::errors::AppError;
@@ -167,11 +169,19 @@ impl<T: AuthRepository + std::fmt::Debug> AuthService<T> {
         let path: PathBuf =
             Path::new(&format!("images/user_profile/{}", profile_image_name)).to_path_buf();
 
-		let mut fl = File::open(path).unwrap();
-        let mut img_buffer = Vec::new();
-		fl.read_to_end(&mut img_buffer);
+        let mut hm = HM.lock().unwrap();
 
-		Result::Ok(Bytes::from(img_buffer))
+        if let Some(bytes) = hm.get(&path) {
+            return Ok(bytes.clone());
+        } else {
+            let mut file = File::open(&path).unwrap();
+            let mut img_buffer = Vec::new();
+            file.read_to_end(&mut img_buffer);
+            let img_bytes = Bytes::from(img_buffer);
+            hm.insert(path, img_bytes.clone());
+            return Ok(img_bytes);
+        }
+
     }
 
     pub async fn validate_session(&self, session_token: &str) -> Result<bool, AppError> {
