@@ -167,14 +167,11 @@ impl<T: AuthRepository + std::fmt::Debug> AuthService<T> {
         let path: PathBuf =
             Path::new(&format!("images/user_profile/{}", profile_image_name)).to_path_buf();
 
-				let mut fl = File::open(path).unwrap();
+		let mut fl = File::open(path).unwrap();
         let mut img_buffer = Vec::new();
-				fl.read_to_end(&mut img_buffer);
+		fl.read_to_end(&mut img_buffer);
 
-				match true {
-					true => Ok(Bytes::from(img_buffer)),
-					false => Err(AppError::InternalServerError)
-				}
+		Result::Ok(Bytes::from(img_buffer))
     }
 
     pub async fn validate_session(&self, session_token: &str) -> Result<bool, AppError> {
