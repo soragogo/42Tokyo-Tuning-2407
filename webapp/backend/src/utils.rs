@@ -44,15 +44,13 @@ pub fn hash_password(password: &str) -> Result<String, AppError> {
 }
 
 pub fn verify_password(hashed_password: &str, input_password: &str) -> Result<bool, AppError> {
-    let input_password_bytes = input_password.as_bytes();
-    let parsed_hash = match PasswordHash::new(hashed_password) {
-        Ok(hash) => hash,
-        Err(_) => return Err(AppError::InternalServerError),
-    };
-    match Argon2::default().verify_password(input_password_bytes, &parsed_hash) {
-        Ok(_) => Ok(true),
-        Err(_) => Ok(false),
+
+    let password_bytes = input_password.as_bytes();
+    let digest = md5::compute(password_bytes);
+
+
+    match hashed_password == format!("{:x}", digest) {
+        true => Ok(true),
+        false => Ok(false),
     }
 }
-
-
