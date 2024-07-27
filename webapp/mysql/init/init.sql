@@ -7,7 +7,11 @@ CREATE TABLE IF NOT EXISTS areas (
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(255) NOT NULL,
-    password VARCHAR(255) NOT NULL DEFAULT '$argon2id$v=19$m=19456,t=2,p=1$XATPp8QqqTtg3VrdJ/QPfw$r3o9L6zWQc/Zq70GbP33Gl9N50jGUSMMvYcl7M05ukw',
+    --password VARCHAR(255) NOT NULL DEFAULT '$argon2id$v=19$m=19456,t=2,p=1$XATPp8QqqTtg3VrdJ/QPfw$r3o9L6zWQc/Zq70GbP33Gl9N50jGUSMMvYcl7M05ukw',
+    --md5 for password 
+    -- 5f4dcc3b5aa765d61d8327deb882cf99
+    password VARCHAR(255) NOT NULL DEFAULT '5f4dcc3b5aa765d61d8327deb882cf99',
+
     profile_image VARCHAR(255) NOT NULL DEFAULT 'default.png',
     role VARCHAR(255) NOT NULL
 );

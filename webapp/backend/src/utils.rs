@@ -3,6 +3,7 @@ use argon2::{
     Argon2,
 };
 use rand::Rng;
+use md5;
 
 use crate::errors::AppError;
 
@@ -19,17 +20,27 @@ pub fn generate_session_token() -> String {
 }
 
 pub fn hash_password(password: &str) -> Result<String, AppError> {
+
     let password_bytes = password.as_bytes();
-    let salt = SaltString::generate(&mut OsRng);
+    let digest = md5::compute(password_bytes);
+
+    //let salt = SaltString::generate(&mut OsRng);
 
     // Argon2 with default params (Argon2id v19)
-    let argon2 = Argon2::default();
+    //let argon2 = Argon2::default();
 
     // Hash password to PHC string ($argon2id$v=19$...)
-    match argon2.hash_password(password_bytes, &salt) {
-        Ok(hashed_password_bytes) => Ok(hashed_password_bytes.to_string()),
-        Err(_) => Err(AppError::InternalServerError),
-    }
+    //match argon2.hash_password(password_bytes, &salt) {
+        //Ok(hashed_password_bytes) => Ok(hashed_password_bytes.to_string()),
+        //Err(_) => Err(AppError::InternalServerError),
+    //}
+
+    //match md5::compute(password_bytes) {
+        //Ok(digest) => Ok(digest.to_string()),
+        //Err(_) => Err(AppError::InternalServerError),
+    //}
+    //format!("{:x}", digest)
+    Ok(format!("{:x}", digest))
 }
 
 pub fn verify_password(hashed_password: &str, input_password: &str) -> Result<bool, AppError> {
@@ -43,3 +54,5 @@ pub fn verify_password(hashed_password: &str, input_password: &str) -> Result<bo
         Err(_) => Ok(false),
     }
 }
+
+
