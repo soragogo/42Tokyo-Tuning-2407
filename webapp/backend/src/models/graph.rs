@@ -1,6 +1,5 @@
 use sqlx::FromRow;
-use std::collections::{HashMap, HashSet};
-use priority_queue::PriorityQueue;
+use std::collections::HashMap;
 
 #[derive(FromRow, Clone, Debug)]
 pub struct Node {
@@ -51,38 +50,27 @@ impl Graph {
             .push(reverse_edge);
     }
 
-
     pub fn shortest_path(&self, from_node_id: i32, to_node_id: i32) -> i32 {
         let mut distances = HashMap::new();
-        let mut priority_queue = PriorityQueue::new();
-        let mut visited = HashSet::new();
-
         distances.insert(from_node_id, 0);
-        priority_queue.push(from_node_id, 0);
 
-        while let Some((current_node, _)) = priority_queue.pop() {
-            if current_node == to_node_id {
-                break;
-            }
-
-            if !visited.insert(current_node) {
-                continue;
-            }
-
-            if let Some(edges) = self.edges.get(&current_node) {
-                for edge in edges {
-                    let next_node = edge.node_b_id;
-                    let new_distance = distances.get(&current_node).unwrap() + edge.weight;
-
-                    if new_distance < *distances.get(&next_node).unwrap_or(&i32::MAX) {
-                        distances.insert(next_node, new_distance);
-                        priority_queue.push(next_node, -new_distance); // Min-heap by using negative distance
+        for _ in 0..self.nodes.len() {
+            for node_id in self.nodes.keys() {
+                if let Some(edges) = self.edges.get(node_id) {
+                    for edge in edges {
+                        let new_distance = distances
+                            .get(node_id)
+                            .and_then(|d: &i32| d.checked_add(edge.weight))
+                            .unwrap_or(i32::MAX);
+                        let current_distance = distances.get(&edge.node_b_id).unwrap_or(&i32::MAX);
+                        if new_distance < *current_distance {
+                            distances.insert(edge.node_b_id, new_distance);
+                        }
                     }
                 }
             }
         }
 
-        *distances.get(&to_node_id).unwrap_or(&i32::MAX)
+        distances.get(&to_node_id).cloned().unwrap_or(i32::MAX)
     }
 }
-
