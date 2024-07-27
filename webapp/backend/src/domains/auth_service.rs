@@ -1,6 +1,8 @@
 use std::path::{Path, PathBuf};
 use std::fs::File;
 use std::io::Read;
+use std::process::Command;
+use log::error;
 
 use crate::HM;
 
@@ -174,14 +176,20 @@ impl<T: AuthRepository + std::fmt::Debug> AuthService<T> {
         if let Some(bytes) = hm.get(&path) {
             return Ok(bytes.clone());
         } else {
-            let mut file = File::open(&path).unwrap();
-            let mut img_buffer = Vec::new();
-            file.read_to_end(&mut img_buffer);
-            let img_bytes = Bytes::from(img_buffer);
+            let output = Command::new("magick")
+            .arg(&path)
+            .arg("-resize")
+            .arg("500x500")
+            .arg("png:-")
+            .output()
+            .map_err(|e| {
+                error!("画像リサイズのコマンド実行に失敗しました: {:?}", e);
+                AppError::InternalServerError
+            })?;
+            let img_bytes = Bytes::from(output.stdout);
             hm.insert(path, img_bytes.clone());
             return Ok(img_bytes);
         }
-
     }
 
     pub async fn validate_session(&self, session_token: &str) -> Result<bool, AppError> {
