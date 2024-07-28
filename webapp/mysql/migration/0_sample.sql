@@ -13,11 +13,11 @@ CREATE INDEX idx_nodes_area_id ON nodes(area_id);
 
 CREATE INDEX idx_edges_node_a_id ON edges(node_a_id);
 
-CREATE INDEX idx_nodes_id ON nodes(id);
+-- CREATE INDEX idx_nodes_id ON nodes(id);
 
-CREATE INDEX idx_orders_status ON orders(status);
+-- CREATE INDEX idx_orders_status ON orders(status);
 
-CREATE INDEX idx_tow_trucks_status ON tow_trucks(status);
-CREATE INDEX idx_tow_trucks_area_id ON tow_trucks(area_id);
-CREATE INDEX idx_locations_tow_truck_id ON locations(tow_truck_id);
-CREATE INDEX idx_locations_timestamp ON locations(timestamp);
+-- CREATE INDEX idx_tow_trucks_status ON tow_trucks(status);
+-- CREATE INDEX idx_tow_trucks_area_id ON tow_trucks(area_id);
+-- CREATE INDEX idx_locations_tow_truck_id ON locations(tow_truck_id);
+-- CREATE INDEX idx_locations_timestamp ON locations(timestamp);

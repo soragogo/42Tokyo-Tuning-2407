@@ -1,6 +1,6 @@
-use std::sync::Arc;
 use actix_web::web::Bytes;
 use std::path::PathBuf;
+use std::sync::Arc;
 
 use actix_cors::Cors;
 use actix_web::{web, App, HttpServer};
@@ -27,8 +27,8 @@ mod models;
 mod repositories;
 mod utils;
 use lazy_static::lazy_static;
-use std::sync::Mutex;
 use std::collections::HashMap;
+use std::sync::Mutex;
 
 lazy_static! {
     pub static ref HM: Mutex<HashMap<PathBuf, Bytes>> = Mutex::new(HashMap::new());
@@ -36,7 +36,6 @@ lazy_static! {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-
     let pool = infrastructure::db::create_pool().await;
     let mut port = 8080;
 
@@ -162,7 +161,7 @@ async fn main() -> std::io::Result<()> {
             )
     })
     .bind(format!("0.0.0.0:{port}"))?
-    .workers(4)
+    .workers(8)
     .run()
     .await
 }
