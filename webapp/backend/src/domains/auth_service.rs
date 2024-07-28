@@ -1,9 +1,8 @@
-use log::error;
-// use std::fs::Fixle;
-use std::io::BufReader;
-use std::io::Read;
 use std::path::{Path, PathBuf};
+use std::fs::File;
+use std::io::Read;
 use std::process::Command;
+use log::error;
 
 use crate::HM;
 
@@ -14,7 +13,6 @@ use crate::models::user::{Dispatcher, Session, User};
 use crate::utils::{generate_session_token, hash_password, verify_password};
 
 use super::dto::auth::LoginResponseDto;
-use image::imageops::FilterType;
 
 pub trait AuthRepository {
     async fn create_user(&self, username: &str, password: &str, role: &str)
@@ -178,32 +176,17 @@ impl<T: AuthRepository + std::fmt::Debug> AuthService<T> {
         if let Some(bytes) = hm.get(&path) {
             return Ok(bytes.clone());
         } else {
-            // let output = Command::new("magick")
-            // .arg(&path)
-            // .arg("-resize")
-            // .arg("500x500")
-            // .arg("png:-")
-            // .output()
-            // .map_err(|e| {
-            //     error!("画像リサイズのコマンド実行に失敗しました: {:?}", e);
-            //     AppError::InternalServerError
-            // })?;
-            // let img_bytes = Bytes::from(output.stdout);
-            // hm.insert(path, img_bytes.clone());
-            // return Ok(img_bytes);
-            let img = image::open(&path).map_err(|e| {
-                error!("画像の読み込みに失敗しました: {:?}", e);
+            let output = Command::new("magick")
+            .arg(&path)
+            .arg("-resize")
+            .arg("500x500")
+            .arg("png:-")
+            .output()
+            .map_err(|e| {
+                error!("画像リサイズのコマンド実行に失敗しました: {:?}", e);
                 AppError::InternalServerError
             })?;
-            let resized_img = img.resize(500, 500, FilterType::Lanczos3);
-            let mut buf: Vec<u8> = Vec::new();
-            resized_img
-                .write_to(&mut buf, image::ImageOutputFormat::Png)
-                .map_err(|e| {
-                    error!("画像の書き込みに失敗しました: {:?}", e);
-                    AppError::InternalServerError
-                })?;
-            let img_bytes = Bytes::from(buf);
+            let img_bytes = Bytes::from(output.stdout);
             hm.insert(path, img_bytes.clone());
             return Ok(img_bytes);
         }
